@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">EduBright</string>
+    <string name="signup">Register</string>
+    <string name="login">Login</string>
+    <string name="message_welcome_page">EduBright adalah platform pembelajaran interaktif yang membuat belajar jadi mudah dan menyenangkan. Temukan kursus, latihan soal, dan tantangan menarik untuk membantu Anda meraih kesuksesan pendidikan dengan cara yang kreatif dan inovatif.</string>
+    <string name="message_support">Belajar Cerdas, Raih Prestasi!</string>
+    <string name="title_welcome_page">Welcome to EduBright</string>
+    <string name="title_signup_page">Complete your data below</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="message_login_page">Please enter your data first</string>
+    <string name="title_login_page">Are you ready to upgrade your skills?</string>
+    <string name="name">Nama</string>
+    <string name="message_main_page">Selamat Belajar di Dicoding.</string>
+    <string name="greeting">Halo %1$s,</string>
+    <string name="logout">Keluar</string>
+</resources>
