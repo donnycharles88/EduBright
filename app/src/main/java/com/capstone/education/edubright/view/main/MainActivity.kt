@@ -1,26 +1,72 @@
 package com.capstone.education.edubright.view.main
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.capstone.education.edubright.R
 import com.capstone.education.edubright.databinding.ActivityMainBinding
+import com.capstone.education.edubright.view.chat.ChatActivity
 import com.capstone.education.edubright.view.ViewModelFactory
 import com.capstone.education.edubright.view.welcome.WelcomeActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by viewModels<MainViewModel> {
         ViewModelFactory.getInstance(this)
     }
     private lateinit var binding: ActivityMainBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var adapter: EduAdapter
+    private val items = listOf(
+        EduAdapter.EduItem(
+            titleRes = R.string.tv_database_design_programming,
+            authorRes = R.string.tvAuthor_database_design,
+            descriptionRes = R.string.tvDesc_Database_Design,
+            imageRes = R.drawable.database_design_programming
+        ),
+        EduAdapter.EduItem(
+            titleRes = R.string.tvTitle_sql_fundamental,
+            authorRes = R.string.tvAuthor_sql_fundamental,
+            descriptionRes = R.string.tvDesc_sql_fundamental,
+            imageRes = R.drawable.sql_fundamental
+        ),
+        EduAdapter.EduItem(
+            titleRes = R.string.tvTitle_cloud_computing,
+            authorRes = R.string.tvAuthor_cloud_computing,
+            descriptionRes = R.string.tvDesc_cloud_computing,
+            imageRes = R.drawable.cloud_computing
+        ),
+        EduAdapter.EduItem(
+            titleRes = R.string.tvTitle_machine_learning,
+            authorRes = R.string.tvAuthor_machine_learning,
+            descriptionRes = R.string.tvDesc_machine_learning,
+            imageRes = R.drawable.machine_learning
+        ),
+        EduAdapter.EduItem(
+            titleRes = R.string.tvTitle_kotlin_fund,
+            authorRes = R.string.tvAuthor_kotlin_fund,
+            descriptionRes = R.string.tvDesc_kotlin_fund,
+            imageRes = R.drawable.kotlin_fund
+        ),
+        EduAdapter.EduItem(
+            titleRes = R.string.tvTitle_uiux_design,
+            authorRes = R.string.tvAuthor_uiux_design,
+            descriptionRes = R.string.tvDesc_uiux_design,
+            imageRes = R.drawable.uiux_design
+        )
+    )
+    private var filteredItems = items.toMutableList()
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -31,11 +77,18 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
+        setContentView(binding.root)
+        supportActionBar?.apply {
+            title = getString(R.string.home)
+            setDisplayHomeAsUpEnabled(false)
+        }
 
         setupView()
-        setupAction()
-        playAnimation()
-    }
+        setupBottomNavigation()
+        setupRecyclerView()
+        setupSearchView()
+
+        }
 
     private fun setupView() {
         @Suppress("DEPRECATION")
@@ -47,29 +100,101 @@ class MainActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
-        supportActionBar?.hide()
     }
+    private fun setupBottomNavigation() {
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        bottomNavigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.primaryColor))
+        bottomNavigationView.itemIconTintList = ContextCompat.getColorStateList(this, R.color.iconTint)
+        bottomNavigationView.itemTextColor = ContextCompat.getColorStateList(this, R.color.white)
 
-    private fun setupAction() {
-        binding.logoutButton.setOnClickListener {
-            viewModel.logout()
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_search -> {
+                    val intent = Intent(this, ChatActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_home -> {
+                    if (javaClass != MainActivity::class.java) {
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.search_page -> {
+                if (binding.searchView.visibility == View.GONE) {
+                    binding.searchView.visibility = View.VISIBLE
+                } else {
+                    binding.searchView.visibility = View.GONE
+                }
+                true
+            }
+            R.id.logout_page -> {
+                AlertDialog.Builder(this).setTitle(getString(R.string.logout))
+                    .setMessage(getString(R.string.confirm_logout))
+                    .setPositiveButton("Yes") { _, _ ->
+                        viewModel.logout()
+                    }
+                    .setNegativeButton("No") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun playAnimation() {
-        ObjectAnimator.ofFloat(binding.imageView, View.TRANSLATION_X, -30f, 30f).apply {
-            duration = 6000
-            repeatCount = ObjectAnimator.INFINITE
-            repeatMode = ObjectAnimator.REVERSE
-        }.start()
+    private fun setupRecyclerView() {
+        adapter = EduAdapter(filteredItems) { selectedItem ->
+            val intent = Intent(this, DetailActivity::class.java).apply {
+                putExtra("TITLE_RES", selectedItem.titleRes)
+                putExtra("AUTHOR_RES", selectedItem.authorRes)
+                putExtra("DESCRIPTION_RES", selectedItem.descriptionRes)
+                putExtra("IMAGE_RES", selectedItem.imageRes)
+            }
+            startActivity(intent)
+        }
 
-        val name = ObjectAnimator.ofFloat(binding.nameTextView, View.ALPHA, 1f).setDuration(100)
-        val message = ObjectAnimator.ofFloat(binding.messageTextView, View.ALPHA, 1f).setDuration(100)
-        val logout = ObjectAnimator.ofFloat(binding.logoutButton, View.ALPHA, 1f).setDuration(100)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+    private fun setupSearchView() {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
 
-        AnimatorSet().apply {
-            playSequentially(name, message, logout)
-            startDelay = 100
-        }.start()
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filteredItems.clear()
+                if (newText.isNullOrEmpty()) {
+                    filteredItems.addAll(items)
+                } else {
+                    val query = newText.lowercase()
+                    filteredItems.addAll(items.filter { item ->
+                        val context = this@MainActivity
+                        context.getString(item.titleRes).lowercase().contains(query) ||
+                                context.getString(item.authorRes).lowercase().contains(query)
+                    })
+                }
+                adapter.notifyDataSetChanged()
+                return true
+            }
+        })
+    }
+    override fun onResume() {
+        super.onResume()
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        bottomNavigationView.selectedItemId = R.id.nav_home
     }
 }

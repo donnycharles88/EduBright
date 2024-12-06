@@ -4,4 +4,19 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="navy">#2D3D4F</color>
+    <color name="grey">#8e918f</color>
+    <color name="back_color">#363342</color>
+    <color name="edt_back_color">#414051</color>
+
+    <color name="primaryColor">#6366F1</color>
+    <color name="primaryColorDark">#4E53C8</color>
+    <color name="primaryTextColor">#FFFFFF</color>
+    <color name="secondaryColor">#BB86FC</color>
+
+    <color name="selectedIconColor">#03DAC5</color>
+    <color name="defaultIconColor">#9E9E9E</color>
+    <color name="iconTint">#7F7F7F</color>
+    <color name="textColor">#7F7F7F</color>
+    <color name="rippleColor">#FF6200EE</color>
+    <color name="activeColor">#6200EE</color>
 </resources>
