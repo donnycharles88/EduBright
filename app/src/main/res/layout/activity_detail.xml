@@ -63,7 +63,6 @@
                 android:lineSpacingMultiplier="1.3"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Feedback Section -->
             <TextView
                 android:id="@+id/tvFeedbackTitle"
                 android:layout_width="match_parent"
@@ -75,7 +74,6 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Sentiment Section -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -108,7 +106,6 @@
                             android:id="@+id/tvAwesomePercentage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Awesome: 40%"
                             android:textColor="#2ECC71"
                             android:textStyle="bold"
                             android:layout_marginBottom="8dp" />
@@ -117,7 +114,6 @@
                             android:id="@+id/tvGoodPercentage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Good: 35%"
                             android:textColor="#3498DB"
                             android:textStyle="bold"
                             android:layout_marginBottom="8dp" />
@@ -126,14 +122,11 @@
                             android:id="@+id/tvOtherPercentage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Others: 25%"
                             android:textColor="#95A5A6"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <!-- AI Student Analyzer -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
