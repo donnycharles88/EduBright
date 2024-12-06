@@ -92,10 +92,9 @@
                     <com.anychart.AnyChartView
                         android:id="@+id/ivSentimentGraph"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
+                        android:layout_height="500dp"
                         android:layout_marginBottom="16dp"
                         android:background="@android:color/white" />
-
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -160,7 +159,6 @@
                 android:layout_marginBottom="16dp"
                 android:inputType="textMultiLine" />
 
-            <!-- Feedback Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnFeedback"
                 android:layout_width="match_parent"
