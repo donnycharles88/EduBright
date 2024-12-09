@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context=".view.chat.ChatActivity">
+    android:background="#F5F5F5"
+    tools:context=".view.chat.ChatActivity"
+    >
 
     <EditText
     android:id="@+id/etQuestion"

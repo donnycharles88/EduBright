@@ -8,9 +8,16 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Patterns
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.capstone.education.edubright.R
 import com.capstone.education.edubright.data.pref.UserModel
 import com.capstone.education.edubright.data.pref.Result
@@ -19,17 +26,31 @@ import com.capstone.education.edubright.data.response.LoginResult
 import com.capstone.education.edubright.databinding.ActivityLoginBinding
 import com.capstone.education.edubright.view.ViewModelFactory
 import com.capstone.education.edubright.view.main.MainActivity
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
+
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityLoginBinding
     private lateinit var factory: ViewModelFactory
+    private lateinit var auth: FirebaseAuth
+    private val credentialManager by lazy { CredentialManager.create(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+
+        auth = FirebaseAuth.getInstance()
+
+        binding.googleSignInButton.setOnClickListener {
+            authWithGoogleUsingCredentialManager()
+        }
 
         factory = ViewModelFactory.getInstance(this)
         playAnimation()
@@ -40,6 +61,74 @@ class LoginActivity : AppCompatActivity() {
         loginViewModel.loginResult.observe(this) { result ->
             setupLogin(result)
         }
+    }
+
+    private fun authWithGoogleUsingCredentialManager() {
+        lifecycleScope.launch {
+            try {
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(true)
+                    .setServerClientId(getString(R.string.default_web_client_id))
+                    .build()
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                val result = credentialManager.getCredential(this@LoginActivity, request)
+                handleGoogleIdCredentialResult(result)
+            } catch (e: NoCredentialException) {
+                authWithGoogleUsingGoogleIdWithNoFilter()
+            } catch (e: GetCredentialException) {
+                Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun authWithGoogleUsingGoogleIdWithNoFilter() {
+        lifecycleScope.launch {
+            try {
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(getString(R.string.default_web_client_id))
+                    .build()
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                val result = credentialManager.getCredential(this@LoginActivity, request)
+                handleGoogleIdCredentialResult(result)
+            } catch (e: GetCredentialException) {
+                Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun handleGoogleIdCredentialResult(result: GetCredentialResponse) {
+        val credential = result.credential
+        if (credential is GoogleIdTokenCredential) {
+            firebaseAuthWithGoogle(credential.idToken)
+        } else {
+            Toast.makeText(this, "Credential type not supported", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    loginViewModel.saveSession(UserModel(user?.displayName ?: "", user?.getIdToken(false)?.result?.token ?: "", true))
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     private fun setupInput() {
@@ -85,7 +174,7 @@ class LoginActivity : AppCompatActivity() {
                 loginViewModel.saveSession(
                     UserModel(userData?.name ?: "", userData?.token ?: "", true))
                 AlertDialog.Builder(this@LoginActivity).apply {
-                    setTitle("Yeay!")
+                    setTitle("Horayy!")
                     setMessage(getString(R.string.success_login))
                     setPositiveButton(getString(R.string.next)) { _, _ ->
                         val intent = Intent(context, MainActivity::class.java)
@@ -110,6 +199,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
@@ -118,6 +208,7 @@ class LoginActivity : AppCompatActivity() {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
+    @Suppress("DEPRECATION")
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return super.onSupportNavigateUp()
@@ -136,6 +227,7 @@ class LoginActivity : AppCompatActivity() {
         val passwordTextView = ObjectAnimator.ofFloat(binding.passwordTextView, View.ALPHA, 1f).setDuration(100)
         val passwordEditTextLayout = ObjectAnimator.ofFloat(binding.passwordEditTextLayout, View.ALPHA, 1f).setDuration(100)
         val login = ObjectAnimator.ofFloat(binding.loginButton, View.ALPHA, 1f).setDuration(100)
+        val googleSignIn = ObjectAnimator.ofFloat(binding.googleSignInButton, View.ALPHA, 1f).setDuration(100)
 
         AnimatorSet().apply {
             playSequentially(
@@ -144,7 +236,8 @@ class LoginActivity : AppCompatActivity() {
                 emailEditTextLayout,
                 passwordTextView,
                 passwordEditTextLayout,
-                login
+                login,
+                googleSignIn
             )
             startDelay = 100
         }.start()

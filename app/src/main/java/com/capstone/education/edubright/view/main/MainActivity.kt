@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         )
     )
     private var filteredItems = items.toMutableList()
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupSearchView()
 
-        }
+    }
 
     private fun setupView() {
         @Suppress("DEPRECATION")

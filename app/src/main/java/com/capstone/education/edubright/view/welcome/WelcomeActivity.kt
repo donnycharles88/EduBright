@@ -64,5 +64,4 @@ class WelcomeActivity : AppCompatActivity() {
             start()
         }
     }
-
 }

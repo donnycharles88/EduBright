@@ -87,7 +87,7 @@ class UserRepository private constructor(
                 _isLoading.value = false
                 if (response.isSuccessful) {
                     _registerUser.value = response.body()
-                    val successMessage = response.body()?.message
+                    val successMessage = response.body()?.message ?: "Unknown success message"
                     _successMessage.postValue(successMessage)
 
 
