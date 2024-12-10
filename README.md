@@ -1,4 +1,4 @@
-## EDUBRIGHT APP
+## EduBright APP
 
 <img src="./mockup.jpg"/>
 
