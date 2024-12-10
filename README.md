@@ -1,4 +1,4 @@
-## STORY APP
+## EDUBRIGHT APP
 
 <img src="./mockup.jpg"/>
 
