@@ -44,7 +44,7 @@ class DetailActivity : AppCompatActivity() {
         binding.btnFeedback.setOnClickListener {
             val feedback = binding.etFeedback.text.toString()
             if (feedback.isNotBlank()) {
-                // Operasikan feedback
+                updateSentimentDataRandomly()
             } else {
                 Toast.makeText(this, "Feedback cannot be empty", Toast.LENGTH_SHORT).show()
             }

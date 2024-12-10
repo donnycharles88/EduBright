@@ -10,4 +10,10 @@
         android:id="@+id/logout_page"
         android:title="@string/logout"
         app:showAsAction="never"  />
+
+    <item
+        android:id="@+id/theme_switch"
+        android:title="@string/dark_mode"
+        app:actionLayout="@layout/switch_theme_layout"
+        app:showAsAction="always" />
 </menu>

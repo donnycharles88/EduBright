@@ -73,6 +73,7 @@
     <string name="enter_valid_otp">Please enter a valid OTP</string>
     <string name="invalid_verification_id">Invalid verification ID</string>
     <string name="otp_verification_failed">OTP verification failed</string>
+    <string name="dark_mode">Dark Mode</string>
 
 
 </resources>

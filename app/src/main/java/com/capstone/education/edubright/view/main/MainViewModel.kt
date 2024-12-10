@@ -9,6 +9,14 @@ import com.capstone.education.edubright.data.pref.UserModel
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: UserRepository) : ViewModel() {
+
+    val isDarkMode: LiveData<Boolean> = repository.getThemePreference()
+    fun toggleTheme(isDarkMode: Boolean) {
+        viewModelScope.launch {
+            repository.setThemePreference(isDarkMode)
+        }
+    }
+
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
     }
@@ -18,5 +26,5 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
             repository.logout()
         }
     }
-
 }
+

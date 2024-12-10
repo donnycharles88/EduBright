@@ -3,6 +3,7 @@ package com.capstone.education.edubright.data
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import com.capstone.education.edubright.data.pref.Result
 import com.capstone.education.edubright.data.pref.UserModel
 import com.capstone.education.edubright.data.pref.UserPreference
@@ -74,7 +75,15 @@ class UserRepository private constructor(
             sentimentDao.insert(sentiment)
         }
     }
+    // Fungsi untuk mendapatkan preferensi tema
+    fun getThemePreference(): LiveData<Boolean> {
+        return userPreference.getThemePreference().asLiveData()
+    }
 
+    // Fungsi untuk menyimpan preferensi tema
+    suspend fun setThemePreference(isDarkMode: Boolean) {
+        userPreference.setThemePreference(isDarkMode)
+    }
 
     fun registerUser(name: String, email: String, password: String) {
         _isLoading.value = true

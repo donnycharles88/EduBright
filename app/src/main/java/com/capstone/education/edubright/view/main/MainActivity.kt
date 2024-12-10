@@ -3,6 +3,7 @@ package com.capstone.education.edubright.view.main
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,6 +12,7 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +22,7 @@ import com.capstone.education.edubright.view.chat.ChatActivity
 import com.capstone.education.edubright.view.ViewModelFactory
 import com.capstone.education.edubright.view.welcome.WelcomeActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by viewModels<MainViewModel> {
@@ -70,6 +73,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        viewModel.isDarkMode.observe(this) { isDarkMode ->
+            // Terapkan tema saat aplikasi dimulai
+            if (isDarkMode) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+
+            // Perbarui warna bottom navigation
+            updateBottomNavigationTheme(isDarkMode)
+        }
+
 
         viewModel.getSession().observe(this) { user ->
             if (!user.isLogin) {
@@ -127,8 +143,34 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-        return super.onCreateOptionsMenu(menu)
+
+        val themeItem = menu.findItem(R.id.theme_switch)
+        val actionView = themeItem.actionView
+        val switchTheme = actionView?.findViewById<SwitchMaterial>(R.id.switch_theme)
+
+        // Observasi perubahan tema dari ViewModel
+        viewModel.isDarkMode.observe(this) { isDarkMode ->
+            switchTheme?.isChecked = isDarkMode
+        }
+
+        // Ubah tema saat switch diubah
+        switchTheme?.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleTheme(isChecked)
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+
+            // Perbarui warna bottom navigation saat tema diubah
+            updateBottomNavigationTheme(isChecked)
+            Log.d("ThemeToggle", "Dark Mode: $isChecked")
+        }
+
+
+        return true
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search_page -> {
@@ -192,6 +234,22 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+    private fun updateBottomNavigationTheme(isDarkMode: Boolean) {
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+
+        if (isDarkMode) {
+            // Gunakan warna yang sesuai untuk tema gelap
+            bottomNavigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.primaryColorDark))
+            bottomNavigationView.itemIconTintList = ContextCompat.getColorStateList(this, R.color.iconTint)
+            bottomNavigationView.itemTextColor = ContextCompat.getColorStateList(this, R.color.white)
+        } else {
+            // Gunakan warna yang sesuai untuk tema terang
+            bottomNavigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.primaryColor))
+            bottomNavigationView.itemIconTintList = ContextCompat.getColorStateList(this, R.color.iconTint)
+            bottomNavigationView.itemTextColor = ContextCompat.getColorStateList(this, R.color.white)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
