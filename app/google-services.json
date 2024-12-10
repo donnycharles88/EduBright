@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "269447904210",
+    "project_id": "capstone-sentiment",
+    "storage_bucket": "capstone-sentiment.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269447904210:android:bef63012e1201a4efd260b",
+        "android_client_info": {
+          "package_name": "com.capstone.education.edubright"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269447904210-geea2v68blne5rq636d1rccej9agbhir.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.education.edubright",
+            "certificate_hash": "ef8d40440b14a1a245654bab677f406cb6d82c83"
+          }
+        },
+        {
+          "client_id": "269447904210-t85488moh49vml9bb908kiem40t3uqed.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV-jQ7X8HaAKDmrDGkkC0DkEjqBYLv7dM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269447904210-t85488moh49vml9bb908kiem40t3uqed.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
