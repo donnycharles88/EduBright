@@ -7,6 +7,8 @@ import androidx.lifecycle.asLiveData
 import com.capstone.education.edubright.data.pref.Result
 import com.capstone.education.edubright.data.pref.UserModel
 import com.capstone.education.edubright.data.pref.UserPreference
+import com.capstone.education.edubright.data.response.CommentResponse
+import com.capstone.education.edubright.data.response.FeedbackStatisticsResponse
 import com.capstone.education.edubright.data.response.LoginRequest
 import com.capstone.education.edubright.data.response.LoginResponse
 import com.capstone.education.edubright.data.response.LoginResult
@@ -21,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -75,15 +78,11 @@ class UserRepository private constructor(
             sentimentDao.insert(sentiment)
         }
     }
-    // Fungsi untuk mendapatkan preferensi tema
-    fun getThemePreference(): LiveData<Boolean> {
-        return userPreference.getThemePreference().asLiveData()
+
+    fun getUserId(): Flow<String> {
+        return userPreference.getSession().map { it.name } // Return the userId (name) from the session
     }
 
-    // Fungsi untuk menyimpan preferensi tema
-    suspend fun setThemePreference(isDarkMode: Boolean) {
-        userPreference.setThemePreference(isDarkMode)
-    }
 
     fun registerUser(name: String, email: String, password: String) {
         _isLoading.value = true
@@ -128,6 +127,36 @@ class UserRepository private constructor(
     fun predictSentiment(feedback: String): Call<PredictResponse> {
         val request = PredictRequest(feedback)
         return apiService.predict(request)
+    }
+
+    fun getFeedbackStatistics(): Flow<Result<FeedbackStatisticsResponse>> = flow {
+        emit(Result.Loading)
+        try {
+            val response = apiService.getFeedbackStatistics()
+            emit(Result.Success(response))
+        } catch (e: Exception) {
+            emit(Result.Error(e.message ?: "Unknown error occurred"))
+        }
+    }
+
+    // Fungsi untuk mem-post komentar dan feedback
+    fun postComment(userId: String, commentText: String, feedbackValue: String): Flow<Result<CommentResponse>> = flow {
+        emit(Result.Loading)
+        try {
+            val response = apiService.postComment(userId, commentText, feedbackValue)
+            emit(Result.Success(response))
+        } catch (e: Exception) {
+            emit(Result.Error(e.message ?: "Unknown error occurred"))
+        }
+    }
+    // Fungsi untuk mendapatkan preferensi tema
+    fun getThemePreference(): LiveData<Boolean> {
+        return userPreference.getThemePreference().asLiveData()
+    }
+
+    // Fungsi untuk menyimpan preferensi tema
+    suspend fun setThemePreference(isDarkMode: Boolean) {
+        userPreference.setThemePreference(isDarkMode)
     }
 
     suspend fun saveSession(user: UserModel) {

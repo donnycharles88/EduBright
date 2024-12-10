@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="#F5F5F5"
     tools:context=".view.main.DetailActivity">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -90,7 +91,7 @@
                     <com.anychart.AnyChartView
                         android:id="@+id/ivSentimentGraph"
                         android:layout_width="match_parent"
-                        android:layout_height="500dp"
+                        android:layout_height="318dp"
                         android:layout_marginBottom="16dp"
                         android:background="@android:color/white" />
 
@@ -119,14 +120,31 @@
                             android:layout_marginBottom="8dp" />
 
                         <TextView
-                            android:id="@+id/tvOtherPercentage"
+                            android:id="@+id/tvNeutralPercentage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="#95A5A6"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tvPoorPercentage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#E74C3C"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tvAwfulPercentage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#C0392B"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -143,6 +161,7 @@
                     android:padding="16dp"
                     android:lineSpacingMultiplier="1.3" />
             </androidx.cardview.widget.CardView>
+
             <EditText
                 android:id="@+id/etFeedback"
                 android:layout_width="match_parent"

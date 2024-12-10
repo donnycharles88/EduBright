@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class UserPreference constructor(private val context: Context) {
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATASOURCE_NAME)
+    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
     private val THEME_KEY = booleanPreferencesKey("theme_preference")
 
     fun getSession(): Flow<UserModel> {
@@ -23,14 +23,6 @@ class UserPreference constructor(private val context: Context) {
             )
         }
     }
-
-    suspend fun saveSession(user: UserModel) {
-        context.dataStore.edit { preferences ->
-            preferences[NAME_KEY] = user.name
-            preferences[TOKEN_KEY] = user.token
-            preferences[IS_LOGIN_KEY] = true
-        }
-    }
     fun getThemePreference(): Flow<Boolean> {
         return context.dataStore.data.map { preferences ->
             preferences[THEME_KEY] ?: false // Default ke light mode
@@ -40,6 +32,15 @@ class UserPreference constructor(private val context: Context) {
     suspend fun setThemePreference(isDarkMode: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[THEME_KEY] = isDarkMode
+        }
+    }
+
+
+    suspend fun saveSession(user: UserModel) {
+        context.dataStore.edit { preferences ->
+            preferences[NAME_KEY] = user.name
+            preferences[TOKEN_KEY] = user.token
+            preferences[IS_LOGIN_KEY] = true
         }
     }
 

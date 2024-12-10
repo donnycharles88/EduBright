@@ -4,47 +4,74 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.anychart.AnyChart
 import com.anychart.AnyChartView
 import com.anychart.chart.common.dataentry.ValueDataEntry
 import com.capstone.education.edubright.R
+import com.capstone.education.edubright.data.UserRepository
+import com.capstone.education.edubright.data.pref.UserPreference
+import com.capstone.education.edubright.data.response.FeedbackStatistics
+import com.capstone.education.edubright.data.retrofit.ApiConfig
+import com.capstone.education.edubright.data.room.SentimentDatabase
 import com.capstone.education.edubright.databinding.ActivityDetailBinding
-import kotlin.random.Random
+import kotlinx.coroutines.launch
+import com.capstone.education.edubright.data.pref.Result
 
 class DetailActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityDetailBinding
-    private lateinit var pieChart: AnyChartView
 
-    // Dummy sentiment data (initial values)
-    private val sentiments = mutableMapOf(
-        "Awesome" to Random.nextInt(0, 50),
-        "Good" to Random.nextInt(0, 50),
-        "Others" to Random.nextInt(0, 50)
-    )
+    private lateinit var binding: ActivityDetailBinding
+    private lateinit var userRepository: UserRepository
+    private lateinit var pieChart: AnyChartView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val titleRes = intent.getIntExtra("TITLE_RES", 0)
-        val authorRes = intent.getIntExtra("AUTHOR_RES", 0)
-        val descriptionRes = intent.getIntExtra("DESCRIPTION_RES", 0)
-        val imageRes = intent.getIntExtra("IMAGE_RES", 0)
+        val titleRes = intent.getIntExtra("TITLE_RES", -1)
+        val authorRes = intent.getIntExtra("AUTHOR_RES", -1)
+        val descriptionRes = intent.getIntExtra("DESCRIPTION_RES", -1)
+        val imageRes = intent.getIntExtra("IMAGE_RES", -1)
 
-        binding.tvCourseTitle.text = getString(titleRes)
-        binding.tvInstructor.text = getString(authorRes)
-        binding.tvDescription.text = getString(descriptionRes)
+        if (titleRes != -1 && authorRes != -1 && descriptionRes != -1 && imageRes != -1) {
+            displayData(titleRes, authorRes, descriptionRes, imageRes)
+        } else {
+            Toast.makeText(this, "Data not available", Toast.LENGTH_SHORT).show()
+        }
+        // Inisialisasi UserRepository
+        val apiService = ApiConfig.getApiService()
+        val userPreference = UserPreference.getInstance(this)
+        val sentimentDao = SentimentDatabase.getInstance(this).sentimentDao()
+        userRepository = UserRepository.getInstance(userPreference, apiService, sentimentDao)
+
+        setupUI()
+        loadFeedbackStatistics()
+    }
+
+    private fun displayData(titleRes: Int, authorRes: Int, descriptionRes: Int, imageRes: Int) {
+        val context = this
+        binding.tvCourseTitle.text = context.getString(titleRes)
+        binding.tvInstructor.text = context.getString(authorRes)
+        binding.tvDescription.text = context.getString(descriptionRes)
         binding.ivCourseImage.setImageResource(imageRes)
+    }
 
+    private fun setupUI() {
         pieChart = binding.ivSentimentGraph
-
-        displaySentimentData()
 
         binding.btnFeedback.setOnClickListener {
             val feedback = binding.etFeedback.text.toString()
             if (feedback.isNotBlank()) {
-                updateSentimentDataRandomly()
+                // Collect userId dynamically from the session
+                lifecycleScope.launch {
+                    userRepository.getUserId().collect { userId ->
+                        val feedback = binding.etFeedback.text.toString()
+                        val feedbackValue = determineSentiment(feedback)
+                        postComment(userId, feedback, feedbackValue)
+                    }
+                }
+
             } else {
                 Toast.makeText(this, "Feedback cannot be empty", Toast.LENGTH_SHORT).show()
             }
@@ -56,23 +83,56 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateSentimentDataRandomly() {
-        val total = Random.nextInt(1, 100)
-        sentiments["Awesome"] = Random.nextInt(0, total)
-        sentiments["Good"] = Random.nextInt(0, total - sentiments["Awesome"]!!)
-        sentiments["Others"] = total - sentiments["Awesome"]!! - sentiments["Good"]!!
-
-        Log.d("SentimentData", sentiments.toString()) // Menampilkan data sentiment baru
-        displaySentimentData()
-        Toast.makeText(this, "Feedback recorded and sentiments updated", Toast.LENGTH_SHORT).show()
+    private fun loadFeedbackStatistics() {
+        lifecycleScope.launch {
+            userRepository.getFeedbackStatistics().collect { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        // Tampilkan loading state
+                    }
+                    is Result.Success -> {
+                        displaySentimentData(result.data.statistics)
+                    }
+                    is Result.Error -> {
+                        Toast.makeText(this@DetailActivity, result.error, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
+    private fun postComment(userId: String, commentText: String, feedbackValue: String) {
+        Log.d("PostCommentData", "userId: $userId, commentText: $commentText, feedbackValue: $feedbackValue") // Tambahkan log di sini
 
-    private fun displaySentimentData() {
-        val total = sentiments.values.sum().toFloat()
-        val dataEntries = sentiments.map { (label, count) ->
-            ValueDataEntry(label, (count / total) * 100)
+        lifecycleScope.launch {
+            userRepository.postComment(userId, commentText, feedbackValue).collect { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        // Tampilkan loading state
+                    }
+                    is Result.Success -> {
+                        Toast.makeText(
+                            this@DetailActivity,
+                            "Feedback submitted successfully!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        loadFeedbackStatistics() // Refresh feedback statistics
+                    }
+                    is Result.Error -> {
+                        Log.e("PostCommentError", "Error: ${result.error}")
+                        Toast.makeText(this@DetailActivity, result.error, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
+    }
+
+    private fun displaySentimentData(statistics: List<FeedbackStatistics>) {
+        val total = statistics.sumOf { it.count }.toFloat()
+        val dataEntries = statistics.map {
+            ValueDataEntry(it.feedback, it.percentage.toFloat())
+        }
+
         val pie = AnyChart.pie()
         pie.data(dataEntries)
         pie.title("Sentiment Analysis")
@@ -80,9 +140,25 @@ class DetailActivity : AppCompatActivity() {
         pieChart.setChart(pie)
 
         // Update percentage labels
-        binding.tvAwesomePercentage.text = "Awesome: ${(sentiments["Awesome"]?.toFloat()?.div(total)?.times(100)?.toInt() ?: 0)}%"
-        binding.tvGoodPercentage.text = "Good: ${(sentiments["Good"]?.toFloat()?.div(total)?.times(100)?.toInt() ?: 0)}%"
-        binding.tvOtherPercentage.text = "Others: ${(sentiments["Others"]?.toFloat()?.div(total)?.times(100)?.toInt() ?: 0)}%"
+        statistics.forEach {
+            when (it.feedback) {
+                "Awesome" -> binding.tvAwesomePercentage.text = "Awesome: ${it.percentage}%"
+                "Good" -> binding.tvGoodPercentage.text = "Good: ${it.percentage}%"
+                "Neutral" -> binding.tvNeutralPercentage.text = "Neutral: ${it.percentage}%"
+                "Poor" -> binding.tvPoorPercentage.text = "Poor: ${it.percentage}%"
+                "Awful" -> binding.tvAwfulPercentage.text = "Awful: ${it.percentage}%"
+            }
+        }
+    }
+
+    private fun determineSentiment(feedback: String): String {
+        return when {
+            feedback.contains("awesome", ignoreCase = true) -> "Awesome"
+            feedback.contains("good", ignoreCase = true) -> "Good"
+            feedback.contains("neutral", ignoreCase = true) -> "Neutral"
+            feedback.contains("poor", ignoreCase = true) -> "Poor"
+            else -> "Awful"
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

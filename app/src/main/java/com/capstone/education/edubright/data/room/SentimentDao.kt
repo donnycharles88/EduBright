@@ -11,7 +11,7 @@ import androidx.room.*
 interface SentimentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(sentiment: Sentiment)
+    suspend fun insert(sentiment: Sentiment): Long // Returns the ID of the inserted or replaced row
 
     @Update
     suspend fun updateSentiment(sentiment: Sentiment)
@@ -20,5 +20,8 @@ interface SentimentDao {
     suspend fun getAllSentiments(): List<Sentiment>
 
     @Query("SELECT * FROM sentiment_table WHERE label = :label")
-    fun getSentimentByLabel(label: String): Sentiment?
+    suspend fun getSentimentByLabel(label: String): Sentiment? // Made suspend for consistency
+
+    @Query("DELETE FROM sentiment_table")
+    suspend fun deleteAllSentiments() // Useful for clearing data during testing or initialization
 }

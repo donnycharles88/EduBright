@@ -18,7 +18,9 @@ abstract class SentimentDatabase : RoomDatabase() {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     SentimentDatabase::class.java, "sentiment_database"
-                ).build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigration() // Consider this if you plan to update the database schema
+                    .build().also { INSTANCE = it }
             }
         }
     }
