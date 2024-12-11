@@ -39,7 +39,6 @@ class DetailActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Data not available", Toast.LENGTH_SHORT).show()
         }
-        // Inisialisasi UserRepository
         val apiService = ApiConfig.getApiService()
         val userPreference = UserPreference.getInstance(this)
         val sentimentDao = SentimentDatabase.getInstance(this).sentimentDao()
@@ -107,7 +106,6 @@ class DetailActivity : AppCompatActivity() {
             userRepository.postComment(userId, commentText).collect { result ->
                 when (result) {
                     is Result.Loading -> {
-                        // Tampilkan loading state
                     }
                     is Result.Success -> {
                         Toast.makeText(
@@ -115,7 +113,7 @@ class DetailActivity : AppCompatActivity() {
                             "Feedback submitted successfully!",
                             Toast.LENGTH_SHORT
                         ).show()
-                        onSuccess?.invoke() // Panggil callback jika ada
+                        onSuccess?.invoke()
                     }
                     is Result.Error -> {
                         Log.e("PostCommentError", "Error: ${result.error}")
@@ -138,7 +136,6 @@ class DetailActivity : AppCompatActivity() {
         pie.labels().position("outside")
         pieChart.setChart(pie)
 
-        // Update percentage labels
         statistics.forEach {
             when (it.feedback) {
                 "Awesome" -> binding.tvAwesomePercentage.text = "Awesome: ${it.percentage}%"

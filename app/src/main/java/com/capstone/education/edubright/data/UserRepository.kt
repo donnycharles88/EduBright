@@ -140,7 +140,6 @@ class UserRepository private constructor(
         }
     }
 
-    // Fungsi untuk mem-post komentar dan feedback
     fun postComment(userId: String, commentText: String): Flow<Result<CommentResponse>> = flow {
         emit(Result.Loading)
         try {
@@ -152,12 +151,10 @@ class UserRepository private constructor(
         }
     }
 
-    // Fungsi untuk mendapatkan preferensi tema
     fun getThemePreference(): LiveData<Boolean> {
         return userPreference.getThemePreference().asLiveData()
     }
 
-    // Fungsi untuk menyimpan preferensi tema
     suspend fun setThemePreference(isDarkMode: Boolean) {
         userPreference.setThemePreference(isDarkMode)
     }

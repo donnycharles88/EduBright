@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class UserPreference constructor(private val context: Context) {
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATASOURCE_NAME)
     private val THEME_KEY = booleanPreferencesKey("theme_preference")
 
     fun getSession(): Flow<UserModel> {

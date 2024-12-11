@@ -34,7 +34,6 @@ interface ApiService {
     fun predict(
         @Body request: PredictRequest): Call<PredictResponse>
 
-    // New or updated endpoints
     @GET("feedback-statistics")
     suspend fun getFeedbackStatistics(): FeedbackStatisticsResponse
 

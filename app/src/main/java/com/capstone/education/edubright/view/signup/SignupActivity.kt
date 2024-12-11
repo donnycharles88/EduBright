@@ -29,10 +29,9 @@ class SignupActivity : AppCompatActivity() {
 
         val userPreference = UserPreference.getInstance(this)
         val apiService = ApiConfig.getApiService()
-        val sentimentDao = SentimentDatabase.getInstance(this).sentimentDao() // Inisialisasi SentimentDao
+        val sentimentDao = SentimentDatabase.getInstance(this).sentimentDao()
 
-        userRepository = UserRepository.getInstance(userPreference, apiService, sentimentDao) // Sertakan sentimentDao
-
+        userRepository = UserRepository.getInstance(userPreference, apiService, sentimentDao)
 
         setupView()
         setupAction()
@@ -75,7 +74,7 @@ class SignupActivity : AppCompatActivity() {
                         create()
                         show()
                     }
-                    userRepository.successMessage.value = null // Reset successMessage setelah ditampilkan
+                    userRepository.successMessage.value = null
                 }
         }
             userRepository.errorLiveData.observe(this) { errorMessage ->
@@ -90,7 +89,6 @@ class SignupActivity : AppCompatActivity() {
                 }
             }
 
-            // Observasi status loading
             userRepository.isLoading.observe(this) { isLoading ->
                 binding.signupButton.isEnabled = !isLoading
             }
