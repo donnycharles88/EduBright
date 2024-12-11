@@ -80,12 +80,14 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
                     <com.anychart.AnyChartView
@@ -96,16 +98,14 @@
                         android:background="@android:color/white" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="16dp">
+                        android:gravity="center">
 
                         <TextView
                             android:id="@+id/tvAwesomePercentage"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#2ECC71"
                             android:textStyle="bold"
@@ -113,7 +113,7 @@
 
                         <TextView
                             android:id="@+id/tvGoodPercentage"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#3498DB"
                             android:textStyle="bold"
@@ -121,7 +121,7 @@
 
                         <TextView
                             android:id="@+id/tvNeutralPercentage"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#95A5A6"
                             android:textStyle="bold"
@@ -129,7 +129,7 @@
 
                         <TextView
                             android:id="@+id/tvPoorPercentage"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#E74C3C"
                             android:textStyle="bold"
@@ -137,13 +137,14 @@
 
                         <TextView
                             android:id="@+id/tvAwfulPercentage"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#C0392B"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"

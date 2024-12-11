@@ -61,21 +61,21 @@ class DetailActivity : AppCompatActivity() {
         pieChart = binding.ivSentimentGraph
 
         binding.btnFeedback.setOnClickListener {
-            val feedback = binding.etFeedback.text.toString()
-            if (feedback.isNotBlank()) {
-                // Collect userId dynamically from the session
+            val userFeedback = binding.etFeedback.text.toString()
+            if (userFeedback.isNotBlank()) {
                 lifecycleScope.launch {
                     userRepository.getUserId().collect { userId ->
-                        val feedback = binding.etFeedback.text.toString()
-                        val feedbackValue = determineSentiment(feedback)
-                        postComment(userId, feedback, feedbackValue)
+                        val feedbackValue = determineSentiment(userFeedback)
+                        postComment(userId, "$userFeedback (Sentiment: $feedbackValue)") {
+                            loadFeedbackStatistics()
+                        }
                     }
                 }
-
             } else {
                 Toast.makeText(this, "Feedback cannot be empty", Toast.LENGTH_SHORT).show()
             }
         }
+
 
         supportActionBar?.apply {
             title = getString(R.string.detail)
@@ -88,7 +88,6 @@ class DetailActivity : AppCompatActivity() {
             userRepository.getFeedbackStatistics().collect { result ->
                 when (result) {
                     is Result.Loading -> {
-                        // Tampilkan loading state
                     }
                     is Result.Success -> {
                         displaySentimentData(result.data.statistics)
@@ -101,11 +100,11 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun postComment(userId: String, commentText: String, feedbackValue: String) {
-        Log.d("PostCommentData", "userId: $userId, commentText: $commentText, feedbackValue: $feedbackValue") // Tambahkan log di sini
+    private fun postComment(userId: String, commentText: String, onSuccess: (() -> Unit)? = null) {
+        Log.d("PostCommentData", "userId: $userId, commentText: $commentText")
 
         lifecycleScope.launch {
-            userRepository.postComment(userId, commentText, feedbackValue).collect { result ->
+            userRepository.postComment(userId, commentText).collect { result ->
                 when (result) {
                     is Result.Loading -> {
                         // Tampilkan loading state
@@ -116,7 +115,7 @@ class DetailActivity : AppCompatActivity() {
                             "Feedback submitted successfully!",
                             Toast.LENGTH_SHORT
                         ).show()
-                        loadFeedbackStatistics() // Refresh feedback statistics
+                        onSuccess?.invoke() // Panggil callback jika ada
                     }
                     is Result.Error -> {
                         Log.e("PostCommentError", "Error: ${result.error}")
@@ -127,8 +126,8 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+
     private fun displaySentimentData(statistics: List<FeedbackStatistics>) {
-        val total = statistics.sumOf { it.count }.toFloat()
         val dataEntries = statistics.map {
             ValueDataEntry(it.feedback, it.percentage.toFloat())
         }

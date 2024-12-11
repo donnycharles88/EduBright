@@ -1,5 +1,6 @@
 package com.capstone.education.edubright.data.retrofit
 
+import com.capstone.education.edubright.data.response.CommentRequest
 import com.capstone.education.edubright.data.response.CommentResponse
 import com.capstone.education.edubright.data.response.FeedbackStatisticsResponse
 import com.capstone.education.edubright.data.response.LoginResponse
@@ -37,11 +38,8 @@ interface ApiService {
     @GET("feedback-statistics")
     suspend fun getFeedbackStatistics(): FeedbackStatisticsResponse
 
-    @FormUrlEncoded
     @POST("comment")
     suspend fun postComment(
-        @Field("user_id") userId: String,
-        @Field("comment_text") commentText: String,
-        @Field("feedback_value") feedbackValue: String
+        @Body commentRequest: CommentRequest
     ): CommentResponse
 }

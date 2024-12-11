@@ -7,6 +7,7 @@ import androidx.lifecycle.asLiveData
 import com.capstone.education.edubright.data.pref.Result
 import com.capstone.education.edubright.data.pref.UserModel
 import com.capstone.education.edubright.data.pref.UserPreference
+import com.capstone.education.edubright.data.response.CommentRequest
 import com.capstone.education.edubright.data.response.CommentResponse
 import com.capstone.education.edubright.data.response.FeedbackStatisticsResponse
 import com.capstone.education.edubright.data.response.LoginRequest
@@ -140,15 +141,17 @@ class UserRepository private constructor(
     }
 
     // Fungsi untuk mem-post komentar dan feedback
-    fun postComment(userId: String, commentText: String, feedbackValue: String): Flow<Result<CommentResponse>> = flow {
+    fun postComment(userId: String, commentText: String): Flow<Result<CommentResponse>> = flow {
         emit(Result.Loading)
         try {
-            val response = apiService.postComment(userId, commentText, feedbackValue)
+            val request = CommentRequest(userId = userId, commentText = commentText)
+            val response = apiService.postComment(request)
             emit(Result.Success(response))
         } catch (e: Exception) {
             emit(Result.Error(e.message ?: "Unknown error occurred"))
         }
     }
+
     // Fungsi untuk mendapatkan preferensi tema
     fun getThemePreference(): LiveData<Boolean> {
         return userPreference.getThemePreference().asLiveData()
