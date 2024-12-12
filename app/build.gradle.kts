@@ -18,7 +18,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_KEY", "\"AIzaSyA6mHhrUIZgGAhpgA6ios_Bdk-7R_DgQlU\"")
+        buildConfigField("String", "API_KEY", "\"AIzaSyApSJuaa6HvUtwX8j59iFoNXFpHdPjDuZY\"")
         buildConfigField("String", "BASE_URL", "\"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent\"")
     }
 
